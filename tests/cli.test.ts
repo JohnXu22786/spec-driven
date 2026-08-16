@@ -65,4 +65,19 @@ describe('CLI 冒烟', () => {
     const result = runCli(['frobnicate'], REPO_ROOT)
     assert.equal(result.status, 2)
   })
+
+  test('scaffold 缺字段：状态码 2 且消息列出缺失项，无堆栈', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'keel-cli-'))
+    try {
+      const scaffold = runCli(['scaffold', 'spec', 'SPEC.md', '--title=demo'], dir)
+      assert.equal(scaffold.status, 2)
+      assert.ok(scaffold.stderr.includes('缺少以下字段'), scaffold.stderr)
+      assert.ok(scaffold.stderr.includes('requirements'), scaffold.stderr)
+      assert.ok(scaffold.stderr.includes('acceptance'), scaffold.stderr)
+      assert.ok(!scaffold.stderr.includes('\n    at '), '不应输出堆栈')
+      assert.ok(!existsSync(join(dir, 'SPEC.md')), '缺字段不应写出文件')
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
 })

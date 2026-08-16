@@ -14,7 +14,7 @@
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRegistry, findTemplate } from './registry.ts'
-import { scaffoldToFile } from './scaffold.ts'
+import { ScaffoldError, scaffoldToFile } from './scaffold.ts'
 import { reviewFile, renderReport, type ReviewConfig } from './review.ts'
 import { DEFAULT_CONFIG } from './manifest.ts'
 
@@ -61,7 +61,15 @@ function commandScaffold(args: string[]): void {
   if (template === undefined) {
     fail(`模板「${templateName}」不存在。可用: ${registry.templates.map((t) => t.name).join('、')}`)
   }
-  const { outPath: written } = scaffoldToFile(template, fields, outPath)
+  let written: string
+  try {
+    written = scaffoldToFile(template, fields, outPath).outPath
+  } catch (error) {
+    if (error instanceof ScaffoldError) {
+      fail(`scaffold 失败：${error.message}（用 --字段=值 补齐后重试）`)
+    }
+    throw error
+  }
   console.log(`已生成 ${written}（模板: ${template.name}）。下一步: node src/cli.ts review ${written}`)
 }
 
