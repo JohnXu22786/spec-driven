@@ -1,0 +1,17 @@
+# keel（龙骨）插件加载补丁示例
+#
+# 用法：
+#   1. 把下方 name 改为本插件 src/index.ts 的绝对路径；
+#   2. 启动 dsh（DeepSeek Harness）时加载本文件：
+#        dsh web --patch ./cordis.example.yml
+#      或复制为项目内 cordis.yml 使用。
+#
+# 完整说明见 docs/INTEGRATION.md。
+
+- insert:
+    - id: keel
+      name: 'D:/Administrator/Desktop/Agent/dsh-plugin/spec-driven/src/index.ts'
+      config:
+        strictness: relaxed
+        requireAssumptions: true
+        maxFindings: 100
