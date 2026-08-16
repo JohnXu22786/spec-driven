@@ -4,3 +4,8 @@ dist/
 __pycache__/
 *.pyc
 .DS_Store
+coverage/
+*.tgz
+*.tsbuildinfo
+*.log
+npm-debug.log*
