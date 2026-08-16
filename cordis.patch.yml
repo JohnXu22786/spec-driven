@@ -1,0 +1,13 @@
+# keel（龙骨）插件加载补丁（dsh.bundle）
+#
+# 由 package.json 的 dsh.bundle.patch 引用。`dsh plugin` 从仓库安装本插件时，
+# 自动把以下 Cordis 插件行插入当前 profile：name 为本包的 npm 包名（keel），
+# dsh 据此解析包入口（src/index.ts，Node ≥ 22.18 类型剥离直接运行）并加载
+# { name, inject, apply } 具名导出，apply 完成工具与技能的注册。
+#
+# 激活方式（任选）：
+#   dsh plugin --profile <name> add github:JohnXu22786/spec-driven
+# 本地手工加载仍可复制 cordis.example.yml 并填入 src/index.ts 的绝对路径。
+- insert:
+    - id: spec-driven
+      name: keel

@@ -19,8 +19,14 @@
     "tests",
     "README.md",
     "cordis.example.yml",
+    "cordis.patch.yml",
     "tsconfig.json"
   ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
   "keywords": [
     "dsh-plugin",
     "spec-driven",
