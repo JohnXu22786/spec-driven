@@ -61,9 +61,17 @@ Values containing spaces must be quoted (as above). `review` exits with code 0 w
 
 ## Installing in DSH
 
+keel ships a `dsh.bundle` manifest (`cordis.patch.yml`, referenced from `package.json`),
+so it installs and activates in one command:
+
 ```sh
 dsh plugin --profile demo add github:JohnXu22786/spec-driven
 ```
+
+The bundler inserts a plugin row (`name: keel`) into the profile and dsh resolves the
+package entry (`src/index.ts`), registering the three tools and five skills on load.
+Manual local loading via a `cordis.yml` patch still works (see
+[docs/INTEGRATION.md](docs/INTEGRATION.md)).
 
 ## Tool interface
 

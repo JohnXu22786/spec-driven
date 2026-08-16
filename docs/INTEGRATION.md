@@ -13,8 +13,21 @@
 | 技能文件 | `skills/*.md` | 五个技能，frontmatter 声明 name（kebab-case）/description/when-to-use |
 | 规格模板 | `templates/*.md` | 六个模板，frontmatter 声明 name/size/fields |
 | 接入示例 | `cordis.example.yml` | 可直接改路径使用的加载补丁 |
+| 发布补丁 | `cordis.patch.yml` | `package.json` 的 `dsh.bundle.patch` 引用，`dsh plugin` 安装时自动生效 |
 
 ## 2. 加载方式
+
+### 2.0 通过 dsh.bundle 一键安装（推荐）
+
+`package.json` 声明了 `dsh.bundle`，仓库自带发布补丁：
+
+```sh
+dsh plugin --profile demo add github:JohnXu22786/spec-driven
+```
+
+安装器读取 `cordis.patch.yml`，把插件行（`id: spec-driven`、`name: keel`）
+插入当前 profile，keel 作为 npm 包被解析并加载 `src/index.ts`，
+无需手动编写任何补丁文件。
 
 ### 2.1 通过 cordis.yml 补丁挂载本地插件
 

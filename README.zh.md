@@ -68,9 +68,16 @@ node src/cli.ts review SPEC.md
 
 ## 在 DSH 中安装
 
+keel 随包携带 `dsh.bundle` 清单（`cordis.patch.yml`，由 `package.json` 引用），
+一条命令即可安装并启用：
+
 ```sh
 dsh plugin --profile demo add github:JohnXu22786/spec-driven
 ```
+
+安装器会把插件行（`name: keel`）插入当前 profile，dsh 解析包入口（`src/index.ts`），
+加载时自动注册三个工具与五个技能。手动本地补丁加载仍然可用（见
+[docs/INTEGRATION.md](docs/INTEGRATION.md)）。
 
 ## 工具接口
 
