@@ -83,4 +83,28 @@ describe('frontmatter 解析', () => {
     assert.equal(result.data['fields'], '{broken json}')
     assert.equal(result.warnings.length, 1)
   })
+
+  test('空值 key: 解析为空字符串', () => {
+    const result = parseFrontmatter('---\ndescription:\n---\n正文')
+    assert.equal(result.data['description'], '')
+  })
+
+  test('大写或非标准布尔写作保留为字符串，不转换为布尔', () => {
+    const text = '---\nactive: True\nflag: YES\n---\n'
+    const result = parseFrontmatter(text)
+    assert.equal(result.data['active'], 'True')
+    assert.equal(result.data['flag'], 'YES')
+  })
+
+  test('键名允许下划线（fields 的占位符键）', () => {
+    const text = '---\nin_scope: 范围内\n---\n'
+    const result = parseFrontmatter(text)
+    assert.equal(result.data['in_scope'], '范围内')
+    assert.equal(result.hasFrontmatter, true)
+  })
+
+  test('引号包裹的纯空白值去除引号后保留', () => {
+    const result = parseFrontmatter('---\ndescription: "   "\n---\n正文')
+    assert.equal(result.data['description'], '   ')
+  })
 })
