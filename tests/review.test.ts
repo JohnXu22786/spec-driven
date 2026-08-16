@@ -142,6 +142,17 @@ describe('规格审查', () => {
     assert.deepEqual(findings, [])
   })
 
+  test('闭合围栏短于起始围栏时不闭合，报 KEEL-0209', () => {
+    const findings = reviewSpecText(
+      specText('## 目标\n\n目标。\n\n## 边界\n\n**范围外（明确不做的）**\n\n- 不做行为 B\n\n## 验证方法\n\n- 运行命令\n\n````\n```\n内容\n\n## 验收标准\n\n- AC-01 可验证'),
+      config(),
+    )
+    const rule = findings.find((f) => f.rule === 'KEEL-0209')
+    assert.ok(rule !== undefined, JSON.stringify(findings))
+    assert.equal(rule.severity, 'warning')
+    assert.ok(findings.some((f) => f.rule === 'KEEL-0101'), '围栏未闭合时其内小节不建节，应报缺少必需小节')
+  })
+
   test('嵌套围栏（外层更长）不误报未闭合', () => {
     const findings = reviewSpecText(
       specText('## 目标\n\n目标。\n\n## 边界\n\n**范围外（明确不做的）**\n\n- 不做行为 B\n\n## 验证方法\n\n- 运行命令\n\n````\n```bash\n内部内容\n```\n````\n\n## 验收标准\n\n- AC-01 可验证'),
@@ -244,6 +255,30 @@ describe('假设登记表审查', () => {
     )
     assert.deepEqual(findings, [])
   })
+
+  test('列表写法：高风险条目内联验证结论即通过', () => {
+    const findings = reviewAssumptionsText(
+      '# 假设登记表\n\n- A-01 框架支持批量写入 [高] ✅ 已验证\n- A-02 数据量不大 [低]',
+      config(),
+    )
+    assert.deepEqual(findings, [])
+  })
+
+  test('列表写法：未标注风险等级报 KEEL-0302', () => {
+    const findings = reviewAssumptionsText(
+      '# 假设登记表\n\n- A-01 框架支持批量写入',
+      config(),
+    )
+    assert.ok(findings.some((f) => f.rule === 'KEEL-0302' && f.severity === 'error'))
+  })
+
+  test('列表写法：高风险未回填结论报 KEEL-0303', () => {
+    const findings = reviewAssumptionsText(
+      '# 假设登记表\n\n- A-01 框架支持批量写入 [高]',
+      config(),
+    )
+    assert.ok(findings.some((f) => f.rule === 'KEEL-0303' && f.severity === 'error'))
+  })
 })
 
 describe('验收审计审查', () => {
@@ -291,6 +326,14 @@ describe('验收审计审查', () => {
       config(),
     )
     assert.deepEqual(findings, [])
+  })
+
+  test('列表行不参与审计数据行（审计只认表格行）', () => {
+    const findings = reviewAuditText(
+      '# 验收审计\n\n- AC-01 目标达成 ✅ 通过',
+      config(),
+    )
+    assert.ok(findings.some((f) => f.rule === 'KEEL-0401'), '仅列表行时审计应视为空')
   })
 })
 
