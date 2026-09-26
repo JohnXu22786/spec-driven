@@ -12,10 +12,16 @@
  */
 
 import type { Registry, Template } from './registry.ts'
-import type { ToolDefinition } from './types.ts'
+import type { ToolDefinition, ToolOutput } from './types.ts'
 import { scaffoldToFile } from './scaffold.ts'
 import { renderReport, reviewFile, type ReviewConfig } from './review.ts'
 import type { KeelConfig } from './manifest.ts'
+
+/** DSH 0.1.7 工具契约：register 要求 output { schema, render }；三个工具都返回纯文本。 */
+const TEXT_OUTPUT: ToolOutput = {
+  schema: { type: 'string' },
+  render: (_args, value) => [{ type: 'text', text: String(value) }],
+}
 
 /** 形状校验 + 透传。参数非法（缺 name/description/parameters）时抛 TypeError。 */
 export function forgeTool(definition: ToolDefinition): ToolDefinition {
@@ -65,6 +71,7 @@ function catalogTool(registry: Registry): ToolDefinition {
     name: 'keel_catalog',
     description: '列出 keel 插件提供的技能与规格模板清单（技能名、模板名与用途），用于选择后续工具参数。',
     parameters: { type: 'object', properties: {}, additionalProperties: false },
+    output: TEXT_OUTPUT,
     execute() {
       const lines: string[] = ['## keel 技能']
       for (const skill of registry.skills) {
@@ -100,12 +107,14 @@ function specTool(registry: Registry): ToolDefinition {
         fields: {
           type: 'object',
           description: '占位符答案：键为模板占位符名，值为填入文本',
-          additionalProperties: { type: 'string' },
+          // DSH 0.1.7 只接受布尔 additionalProperties；非字符串值由 execute 丢弃，缺失字段报「规格不完整」
+          additionalProperties: true,
         },
       },
       required: ['template', 'fields'],
       additionalProperties: false,
     },
+    output: TEXT_OUTPUT,
     execute(args) {
       const templateName = asString(args, 'template')
       if (templateName === undefined) throw new Error('keel_spec 缺少必填参数 template')
@@ -155,6 +164,7 @@ function reviewTool(config: KeelConfig): ToolDefinition {
       required: ['path'],
       additionalProperties: false,
     },
+    output: TEXT_OUTPUT,
     execute(args) {
       const path = asString(args, 'path')
       if (path === undefined) throw new Error('keel_review 缺少必填参数 path')
