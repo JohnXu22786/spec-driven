@@ -25,7 +25,7 @@ import {
   validateConfig,
   type KeelConfig,
 } from './manifest.ts'
-import type { Context, SkillRegistration } from './types.ts'
+import type { Context, SkillRegistration, SkillRegistry } from './types.ts'
 
 export const name = PLUGIN_NAME
 export const version = PLUGIN_VERSION
@@ -69,17 +69,28 @@ export function apply(ctx: Context, rawConfig?: unknown): void {
 
   registerTools(registry, config, { register: (definition) => tools.register(definition) })
 
-  if (ctx.skills?.register) {
-    const registrations: SkillRegistration[] = registry.skills.map((skill) => ({
-      name: skill.name,
-      description: skill.description,
-      content: skill.content,
-      ...(skill.whenToUse !== undefined ? { whenToUse: skill.whenToUse } : {}),
-    }))
+  const registrations: SkillRegistration[] = registry.skills.map((skill) => ({
+    name: skill.name,
+    description: skill.description,
+    content: skill.content,
+    ...(skill.whenToUse !== undefined ? { whenToUse: skill.whenToUse } : {}),
+  }))
+  const registerSkills = (skills: SkillRegistry): void => {
     for (const registration of registrations) {
-      ctx.skills.register(registration)
+      skills.register(registration)
     }
     safeLog(ctx, 'info', `${PLUGIN_DESCRIPTION} 已加载：注册 ${registrations.length} 个技能、${registry.templates.length} 个模板。`)
+  }
+
+  if (typeof ctx.inject === 'function') {
+    // Cordis 宿主（dsh 0.1.7+）禁止读取未声明的服务：skills 作为可选服务按需注入，
+    // 就绪时注册，服务撤销时随子上下文自动撤销（写法同 dsh-tool-pwsh 对 jobs 的处理）。
+    ctx.inject(['skills'], (skillsCtx) => {
+      const skills = skillsCtx.skills
+      if (skills?.register) registerSkills(skills)
+    })
+  } else if (ctx.skills?.register) {
+    registerSkills(ctx.skills)
   } else {
     safeLog(
       ctx,
