@@ -71,6 +71,19 @@ describe('插件入口 apply', () => {
     assert.equal(fake.skills.length, 0)
   })
 
+  test('Cordis skills 服务缺失时提示文件发现回退', () => {
+    const fake = createFakeCtx({ withSkills: false })
+    const warnings: string[] = []
+    const cordisCtx = Object.assign(fake.ctx, {
+      get: (_name: string): unknown => undefined,
+      logger: { warn: (message: string) => warnings.push(message) },
+      inject: () => undefined,
+    })
+    apply(cordisCtx)
+    assert.equal(fake.tools.length, 3)
+    assert.ok(warnings.some((message) => message.includes('.dsh/skills')))
+  })
+
   test('tools 服务缺失时明确报错', () => {
     const fake = createFakeCtx({ withTools: false })
     assert.throws(() => apply(fake.ctx), /tools/)

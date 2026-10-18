@@ -54,6 +54,15 @@ function safeLog(ctx: Context, level: 'info' | 'warn', message: string): void {
   }
 }
 
+function warnMissingSkills(ctx: Context): void {
+  safeLog(
+    ctx,
+    'warn',
+    '当前未发现 ctx.skills 服务；若宿主未提供该服务，技能不会进行运行时注册。可将 skills/ 目录下的技能文件放入 ' +
+      '.dsh/skills（项目级）或配置 customSkillDirs 指向本插件 skills/ 目录，见 docs/INTEGRATION.md。',
+  )
+}
+
 export function apply(ctx: Context, rawConfig?: unknown): void {
   const config: KeelConfig = validateConfig(rawConfig)
   const tools = ctx.tools
@@ -85,6 +94,9 @@ export function apply(ctx: Context, rawConfig?: unknown): void {
   if (typeof ctx.inject === 'function') {
     // Cordis 宿主（dsh 0.1.7+）禁止读取未声明的服务：skills 作为可选服务按需注入，
     // 就绪时注册，服务撤销时随子上下文自动撤销（写法同 dsh-tool-pwsh 对 jobs 的处理）。
+    if (typeof ctx.get === 'function' && ctx.get('skills') === undefined) {
+      warnMissingSkills(ctx)
+    }
     ctx.inject(['skills'], (skillsCtx) => {
       const skills = skillsCtx.skills
       if (skills?.register) registerSkills(skills)
@@ -92,11 +104,6 @@ export function apply(ctx: Context, rawConfig?: unknown): void {
   } else if (ctx.skills?.register) {
     registerSkills(ctx.skills)
   } else {
-    safeLog(
-      ctx,
-      'warn',
-      '未发现 ctx.skills 服务，技能不进行运行时注册。可将 skills/ 目录下的技能文件放入 ' +
-        '.dsh/skills（项目级）或配置 customSkillDirs 指向本插件 skills/ 目录，见 docs/INTEGRATION.md。',
-    )
+    warnMissingSkills(ctx)
   }
 }
