@@ -386,6 +386,24 @@ describe('文件级审查与种类识别', () => {
     }
   })
 
+  test('requireAssumptions：strict 模式下 KEEL-0207 升级为错误并翻转门禁', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'keel-review-'))
+    try {
+      const path = join(dir, 'SPEC.md')
+      writeFileSync(path, goodSpec())
+      const relaxed = reviewFile(path, config({ strict: false, requireAssumptions: true }))
+      const strict = reviewFile(path, config({ strict: true, requireAssumptions: true }))
+      const relaxedFinding = relaxed.findings.find((f) => f.rule === 'KEEL-0207')
+      const strictFinding = strict.findings.find((f) => f.rule === 'KEEL-0207')
+      assert.equal(relaxedFinding?.severity, 'warning')
+      assert.equal(strictFinding?.severity, 'error')
+      assert.equal(relaxed.passed, true)
+      assert.equal(strict.passed, false)
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
   test('maxFindings 截断展示但不翻转门禁结论', () => {
     const dir = mkdtempSync(join(tmpdir(), 'keel-review-'))
     try {

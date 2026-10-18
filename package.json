@@ -47,5 +47,14 @@
     "@types/node": "^24.0.0",
     "typescript": "^5.8.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "author": "JohnXu22786",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JohnXu22786/spec-driven.git"
+  },
+  "homepage": "https://github.com/JohnXu22786/spec-driven#readme",
+  "bugs": {
+    "url": "https://github.com/JohnXu22786/spec-driven/issues"
+  }
 }

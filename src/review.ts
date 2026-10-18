@@ -485,7 +485,9 @@ export function reviewFile(filePath: string, config: ReviewConfig): ReviewReport
       findings.push(...reviewAuditText(content, config))
     }
   }
-  return finishReport(filePath, kind, findings, config)
+  // reviewFile 追加的发现（如 KEEL-0207）不经过各 reviewXxxText 的 escalate，
+  // 必须在收尾处统一升级，否则 strict 模式对它们不生效。
+  return finishReport(filePath, kind, escalate(findings, config.strict), config)
 }
 
 function finishReport(

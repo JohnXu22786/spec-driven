@@ -10,7 +10,8 @@
 
 - insert:
     - id: keel
-      name: 'D:/Administrator/Desktop/Agent/dsh-plugin/spec-driven/src/index.ts'
+      # ↓ 替换为你本机上本仓库 src/index.ts 的真实绝对路径（Windows 用正斜杠或双反斜杠）
+      name: '/绝对路径/spec-driven/src/index.ts'
       config:
         strictness: relaxed
         requireAssumptions: true
