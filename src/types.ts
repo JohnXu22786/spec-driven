@@ -60,6 +60,10 @@ export interface SkillRegistry {
 export interface Context {
   tools?: ToolRegistry
   skills?: SkillRegistry
+  /** Cordis service lookup; returns undefined when a service is not (yet) provided. */
+  get?: (name: string) => unknown
   /** 宿主日志对象；形状未承诺，使用前需防御。 */
   logger?: unknown
+  /** Cordis 宿主的可选服务注入：所列服务就绪时以子上下文调用 callback（dsh 0.1.7+）。 */
+  inject?: (services: string[], callback: (ctx: Context) => void) => unknown
 }
